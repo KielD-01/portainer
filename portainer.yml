@@ -1,0 +1,38 @@
+version: "3.3"
+
+networks:
+  portainer:
+    driver: bridge
+
+volumes:
+  internal-data:
+    driver: local
+
+services:
+  core:
+    image: portainer/portainer-ce:latest
+    container_name: core
+    networks:
+      - portainer
+    volumes:
+      - internal-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    ports:
+      - "8000:8000"
+      - "81:9000"
+      - "9443:9443"
+
+  agent:
+    depends_on:
+      - core
+    image: portainer/agent:latest
+    container_name: agent
+    ports:
+      - "82:9001"
+    networks:
+      - portainer
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    restart: always
